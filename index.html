@@ -190,6 +190,26 @@
         </li>
       
         
+        <li class="menu-item menu-item-devops">
+          <a href="/devops" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-code"></i> <br />
+            
+            运维
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-travel">
+          <a href="/travel" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-photo"></i> <br />
+            
+            旅行
+          </a>
+        </li>
+      
+        
         <li class="menu-item menu-item-archives">
           <a href="/archives" rel="section">
             
@@ -304,6 +324,16 @@
 
           
             
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/01/31/Elasticsearch-集群部署/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/01/31/Elasticsearch-集群部署/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
           
 
           
@@ -338,41 +368,14 @@
 
       
         
-          
-            <h3 id="系统环境准备"><a href="#系统环境准备" class="headerlink" title="系统环境准备"></a>系统环境准备</h3><p>1.优化系统参数</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">vim /etc/security/limits.d/90-nproc.conf</div><div class="line">	*          		soft    nproc           65536</div><div class="line"></div><div class="line">vim /etc/security/limits.conf</div><div class="line">	es               -       nofile          65536</div><div class="line">	</div><div class="line"><span class="built_in">source</span> /etc/profile</div><div class="line"><span class="built_in">ulimit</span> <span class="_">-l</span> unlimited</div></pre></td></tr></table></figure>
-<p>2.关闭或者减少swap使用</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">sysctl vm.swappiness=1</div><div class="line"><span class="built_in">echo</span> <span class="string">"vm.swappiness = 1"</span> &gt;&gt; /etc/sysctl.conf</div></pre></td></tr></table></figure>
-<p>3.调整一个进程可以拥有的VMA(虚拟内存区域)的数量</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">sysctl -w vm.max_map_count=262144</div><div class="line"><span class="built_in">echo</span> <span class="string">"vm.max_map_count = 262144"</span> &gt;&gt; /etc/sysctl.conf</div></pre></td></tr></table></figure>
-<p>4.elasticsearch不能以root用户启动，所以先创建es用户</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">/usr/sbin/groupadd es</div><div class="line">/usr/sbin/useradd es -g es -p elastic</div><div class="line">chown -R es:es /data0/ElasticStack/es/</div><div class="line">mkdir -p /data1/ElasticStack/es/data</div><div class="line">chown -R es:es /data1/ElasticStack/es/data</div></pre></td></tr></table></figure>
-<h3 id="修改ES配置文件"><a href="#修改ES配置文件" class="headerlink" title="修改ES配置文件"></a>修改ES配置文件</h3><p><strong>优化jvm</strong></p>
-<blockquote>
-<p>如果是源码安装，则修改安装路径下的config/jvm.options，如果是rpm包安装，则修改/etc/elasticsearch/jvm.options</p>
-<p>jvm内存为物理内存的50%，且不能超过32G，32位系统不能超过4G</p>
-</blockquote>
-<p><em>通过配置文件设置</em></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">vim /data0/ElasticStack/es/config/jvm.options</div><div class="line">-Xms24g</div><div class="line">-Xmx24g</div></pre></td></tr></table></figure>
-<p><em>通过环境变量设置</em></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">export ES_JAVA_OPTS=&quot;$ES_JAVA_OPTS -Djava.io.tmpdir=/path/to/temp/dir&quot;</div></pre></td></tr></table></figure>
-<p><strong>配置elasticsearch.yml</strong></p>
-<p><em>主节点</em></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line">cp /data0/ElasticStack/es/config/elasticsearch.yml /data0/ElasticStack/es/config/elasticsearch.yml.bak</div><div class="line">	</div><div class="line">vim /data0/ElasticStack/es/config/elasticsearch.yml</div><div class="line">	</div><div class="line"><span class="comment"># Cluster</span></div><div class="line">cluster.name: WeiboAD-ES</div><div class="line">cluster.routing.allocation.disk.watermark.low: 90%</div><div class="line">cluster.routing.allocation.disk.watermark.high: 50gb</div><div class="line">cluster.info.update.interval: 1m</div><div class="line"></div><div class="line"><span class="comment"># Node</span></div><div class="line">node.name: <span class="string">"es.node.2"</span></div><div class="line">node.master: <span class="literal">true</span></div><div class="line">node.data: <span class="literal">false</span></div><div class="line">node.ingest: <span class="literal">false</span></div><div class="line"></div><div class="line"><span class="comment"># Paths</span></div><div class="line">path.data: /data0/ElasticStack/es/data</div><div class="line">path.logs: /data0/ElasticStack/es/logs</div><div class="line"></div><div class="line"><span class="comment"># Memory</span></div><div class="line">bootstrap.memory_lock: <span class="literal">true</span></div><div class="line"></div><div class="line"><span class="comment"># Network</span></div><div class="line">network.host: 10.13.40.114</div><div class="line">network.publish_host: 10.13.40.114</div><div class="line">http.port: 9200</div><div class="line">http.cors.enabled: <span class="literal">true</span></div><div class="line">http.cors.allow-origin: /https?:\/\/10.13.40.114(:[0-9]+)?/</div><div class="line"></div><div class="line"><span class="comment"># Discovery</span></div><div class="line">discovery.zen.ping.unicast.hosts: [<span class="string">"10.77.96.120"</span>,<span class="string">"10.77.96.118"</span>,<span class="string">"10.77.96.161"</span>,<span class="string">"10.73.29.79"</span>]</div><div class="line">discovery.zen.minimum_master_nodes: 2</div><div class="line">discovery.zen.ping_timeout: 120s</div><div class="line">discovery.zen.fd.ping_timeout: 120s</div><div class="line">discovery.zen.fd.ping_retries: 6</div><div class="line">discovery.zen.fd.ping_interval: 30s</div><div class="line"></div><div class="line"><span class="comment"># Indices</span></div><div class="line">indices.requests.cache.size: 2%</div><div class="line">indices.fielddata.cache.size: 10%</div></pre></td></tr></table></figure>
-<p><em>协调节点</em></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line">cp /data0/ElasticStack/es/config/elasticsearch.yml /data0/ElasticStack/es/config/elasticsearch.yml.bak</div><div class="line">	</div><div class="line">vim /data0/ElasticStack/es/config/elasticsearch.yml</div><div class="line"><span class="comment"># Cluster</span></div><div class="line">cluster.name: WeiboAD-ES</div><div class="line">cluster.routing.allocation.disk.watermark.low: 90%</div><div class="line">cluster.routing.allocation.disk.watermark.high: 50gb</div><div class="line">cluster.info.update.interval: 1m</div><div class="line"></div><div class="line"><span class="comment"># Node</span></div><div class="line">node.name: <span class="string">"es.node.4"</span></div><div class="line">node.master: <span class="literal">false</span></div><div class="line">node.data: <span class="literal">false</span></div><div class="line">node.ingest: <span class="literal">false</span></div><div class="line"></div><div class="line"><span class="comment"># Paths</span></div><div class="line">path.data: /data0/ElasticStack/es/data</div><div class="line">path.logs: /data0/ElasticStack/es/logs</div><div class="line"></div><div class="line"><span class="comment"># Memory</span></div><div class="line">bootstrap.memory_lock: <span class="literal">true</span></div><div class="line"></div><div class="line"><span class="comment"># Network</span></div><div class="line">network.host: 10.77.97.161</div><div class="line">network.publish_host: 10.77.97.161</div><div class="line">http.port: 9200</div><div class="line"></div><div class="line"><span class="comment"># Discovery</span></div><div class="line">discovery.zen.ping.unicast.hosts: [<span class="string">"10.13.40.114"</span>,<span class="string">"10.77.96.120"</span>,<span class="string">"10.77.96.118"</span>,<span class="string">"10.73.29.79"</span>]</div><div class="line">discovery.zen.minimum_master_nodes: 2</div><div class="line">discovery.zen.ping_timeout: 120s</div><div class="line">discovery.zen.fd.ping_timeout: 120s</div><div class="line">discovery.zen.fd.ping_retries: 6</div><div class="line">discovery.zen.fd.ping_interval: 30s</div><div class="line"></div><div class="line"><span class="comment"># Indices</span></div><div class="line">indices.requests.cache.size: 2%</div><div class="line">indices.fielddata.cache.size: 10%</div></pre></td></tr></table></figure>
-<p><em>数据节点</em></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line">cp /data0/ElasticStack/es/config/elasticsearch.yml /data0/ElasticStack/es/config/elasticsearch.yml.bak</div><div class="line">	</div><div class="line">vim /data0/ElasticStack/es/config/elasticsearch.yml</div><div class="line"><span class="comment"># Cluster</span></div><div class="line">cluster.name: WeiboAD-ES</div><div class="line">cluster.routing.allocation.disk.watermark.low: 90%</div><div class="line">cluster.routing.allocation.disk.watermark.high: 50gb</div><div class="line">cluster.info.update.interval: 1m</div><div class="line"></div><div class="line"><span class="comment"># Node</span></div><div class="line">node.name: <span class="string">"es.node.6"</span></div><div class="line">node.master: <span class="literal">false</span></div><div class="line">node.data: <span class="literal">true</span></div><div class="line">node.ingest: <span class="literal">false</span></div><div class="line"></div><div class="line"><span class="comment"># Paths</span></div><div class="line">path.data: /data0/ElasticStack/es/data</div><div class="line">path.logs: /data0/ElasticStack/es/logs</div><div class="line"></div><div class="line"><span class="comment"># Memory</span></div><div class="line">bootstrap.memory_lock: <span class="literal">true</span></div><div class="line"></div><div class="line"><span class="comment"># Network</span></div><div class="line">network.host: 10.73.29.79</div><div class="line">network.publish_host: 10.73.29.79</div><div class="line">http.port: 9200</div><div class="line"></div><div class="line"><span class="comment"># Discovery</span></div><div class="line">discovery.zen.ping.unicast.hosts: [<span class="string">"10.13.40.114"</span>,<span class="string">"10.77.96.120"</span>,<span class="string">"10.77.96.118"</span>,<span class="string">"10.77.96.161"</span>]</div><div class="line">discovery.zen.minimum_master_nodes: 2</div><div class="line">discovery.zen.ping_timeout: 120s</div><div class="line">discovery.zen.fd.ping_timeout: 120s</div><div class="line">discovery.zen.fd.ping_retries: 6</div><div class="line">discovery.zen.fd.ping_interval: 30s</div><div class="line"></div><div class="line"><span class="comment"># Indices</span></div><div class="line">indices.requests.cache.size: 2%</div><div class="line">indices.fielddata.cache.size: 10%</div></pre></td></tr></table></figure>
-<blockquote>
-<p><strong>master节点</strong>：主节点负责轻量级的集群范围的操作，例如创建或删除索引，跟踪哪些节点是集群的一部分，以及决定将哪些分片分配给哪些节点。具有稳定的主节点对于群集健康是重要的。任何主合格节点（默认所有节点）可以通过主选举过程选择成为主节点。主节点必须能够访问数据/目录（就像数据节点一样），因为这是集群状态在节点重新启动时持久化的地方。索引和搜索数据是CPU，内存和I/O密集型工作，可能会对节点的资源造成压力。为了确保主节点稳定且不受压力，在较大的集群中分割专用主节点节点和专用数据节点之间的角色是一个好主意。虽然主节点也可以作为协调节点，并将搜索和索引请求从客户端路由到数据节点，但最好不要为此目的使用专用主节点。对于集群的稳定性，主节点节点做尽可能少的工作是重要的。为了防止脑裂行为，我们最好选择3个符合资格的主节点，根据公式：(master_eligible_nodes/2) + 1，设置discovery.zen.minimum_master_nodes:2，这样无论增加多少个数据节点，都不会发生脑裂问题。</p>
-<p><strong>协调节点</strong>：如果您失去了能够处理主任务，保存数据和预处理文档的能力，那么您只能使用一个协调节点，它只能路由请求，处理搜索缩减阶段并分发批量索引。实质上，协调节点仅表现为智能负载平衡器。接收搜索请求或者批量索引请求，并将请求分散转发到保存数据的数据节点，每个数据节点在本地执行请求并将其结果返回给协调节点。 在收集阶段，协调节点将每个数据节点的结果减少为单个全局结果集。每个节点隐含地是协调节点。这意味着，具有全部三个node.master，node.data和node.ingest设置为false的节点将只作为协调节点，不能禁用。结果，这样的节点需要具有足够的存储器和CPU以便处理聚集阶段。协调节点不应该设置过多，这样会增加集群负担，因为主节点必须等待所有节点的集群状态更新确认，协调节点最好不要超过数据节点。</p>
-<p><strong>data节点</strong>：数据节点包含包含您建立索引的文档的分片。数据节点处理数据相关操作，如CRUD，搜索和聚合。这些操作是I/O，内存和CPU密集型操作。重要的是监视这些资源，并且如果它们过载，则添加更多数据节点。拥有专用数据节点的主要好处是主数据和数据角色的分离。</p>
-<p><strong>ingest节点</strong>：导入节点可以执行由一个或多个摄取处理器组成的预处理流水线。根据摄取处理器执行的操作类型和所需资源，具有专用摄取节点可能是有意义的，其将仅执行该特定任。</p>
-<p><strong>tribe节点</strong>：连接多个es集群。</p>
-</blockquote>
-<h3 id="启动ES集群"><a href="#启动ES集群" class="headerlink" title="启动ES集群"></a>启动ES集群</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">ulimit</span> <span class="_">-l</span> unlimited</div><div class="line">su es</div><div class="line">/data0/ElasticStack/es/bin/elasticsearch <span class="_">-d</span></div></pre></td></tr></table></figure>
-
-          
+          <p>关于Elasticsearch 5.1集群的安装过程<br>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/01/31/Elasticsearch-集群部署/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -588,28 +591,37 @@
 
   
 
+  
+    
+  
 
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"kimileonis"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
 
+  
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
   
 
 
 
 
-	
 
 
 
 
-
-  
-
-
-
-
-
-  
-
-  
 
 
 
