@@ -90,7 +90,7 @@
 <meta property="og:url" content="http://yoursite.com/2017/02/12/Elasticsearch-集群滚动升级/index.html">
 <meta property="og:site_name" content="Focus World">
 <meta property="og:description" content="滚动升级允许Elasticsearch集群一次升级一个节点，对用户无停机时间。但是不支持在集群有多个elasticsearch版本时升级超出时间范围的版本，因为分片不会从较新版本复制到较旧版本。所以升级前先看一下当前Elasticsearch的版本是否支持滚动升级。">
-<meta property="og:updated_time" content="2017-02-12T09:16:29.000Z">
+<meta property="og:updated_time" content="2017-02-12T09:18:15.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Elasticsearch 集群滚动升级">
 <meta name="twitter:description" content="滚动升级允许Elasticsearch集群一次升级一个节点，对用户无停机时间。但是不支持在集群有多个elasticsearch版本时升级超出时间范围的版本，因为分片不会从较新版本复制到较旧版本。所以升级前先看一下当前Elasticsearch的版本是否支持滚动升级。">
@@ -391,7 +391,18 @@
 <h2 id="开启分片分配策略"><a href="#开启分片分配策略" class="headerlink" title="开启分片分配策略"></a>开启分片分配策略</h2><p>一旦升级的节点正常加入集群，就可以重新打开集群的分片分配策略</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">curl -XPUT http://升级节点IP:9200/_cluster/settings <span class="_">-d</span> <span class="string">'&#123;"transient":&#123;"cluster.routing.allocation.enable": "all"&#125;&#125;'</span></div></pre></td></tr></table></figure>
 <h2 id="等待升级节点状态恢复"><a href="#等待升级节点状态恢复" class="headerlink" title="等待升级节点状态恢复"></a>等待升级节点状态恢复</h2><p>在升级下一个节点前，我们需要等待集群完成分片分配，我们可以通过下面的命令请求查看集群健康状态</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">curl -XGET http://10.77.96.180:9200/_cat/health?v</div><div class="line">```	</div><div class="line">当status行变成green表示所有的主分配和副本分片已经完成分配</div><div class="line"></div><div class="line">**重要**：</div><div class="line">&gt;- 在滚动升级期间，高版本节点的主分片不会将它们的副本分片分配给低版本的节点，因为新版本与旧版本可能有不一样的数据格式</div><div class="line">- 如果不能分配一个副本分片到另一个高版本，比如：集群中只有一个节点是高版本，那么副本分片将维持在unassigned状态，并且集群将维持在yellow状态。这时，在程序运行前请检查没有初始化或者正在重新定位的分片。</div><div class="line">- 尽快升级另一个节点，副本分片将被分配，集群状态将变为green</div><div class="line"></div><div class="line">没有同步刷新的分配将花费一段时间恢复，恢复状态的个别分片可以通过下面的命令监控</div><div class="line"></div><div class="line">```bash</div><div class="line">curl -XGET http://10.77.96.180:9200/_cat/recovery?v</div></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">curl -XGET http://10.77.96.180:9200/_cat/health?v</div></pre></td></tr></table></figure>
+<p>当status行变成green表示所有的主分配和副本分片已经完成分配</p>
+<p><strong>重要</strong>：</p>
+<blockquote>
+<ul>
+<li>在滚动升级期间，高版本节点的主分片不会将它们的副本分片分配给低版本的节点，因为新版本与旧版本可能有不一样的数据格式</li>
+<li>如果不能分配一个副本分片到另一个高版本，比如：集群中只有一个节点是高版本，那么副本分片将维持在unassigned状态，并且集群将维持在yellow状态。这时，在程序运行前请检查没有初始化或者正在重新定位的分片。</li>
+<li>尽快升级另一个节点，副本分片将被分配，集群状态将变为green</li>
+</ul>
+</blockquote>
+<p>没有同步刷新的分配将花费一段时间恢复，恢复状态的个别分片可以通过下面的命令监控</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">curl -XGET http://10.77.96.180:9200/_cat/recovery?v</div></pre></td></tr></table></figure>
 <p>如果事先停止索引，恢复索引将很安全很快的完成恢复</p>
 <h2 id="重复"><a href="#重复" class="headerlink" title="重复"></a>重复</h2><p>当集群稳定后并且所有节点都恢复完成后，重复上面的步骤完成其它节点的升级</p>
 
