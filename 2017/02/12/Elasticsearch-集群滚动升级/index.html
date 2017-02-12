@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="Elastic Stack," />
 
 
 
@@ -84,12 +84,16 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="Focus World">
-<meta property="og:url" content="http://yoursite.com/index.html">
+<meta name="description" content="Elasticsearch集群滚动升级滚动升级允许Elasticsearch集群一次升级一个节点，对用户无停机时间。但是不支持在集群有多个elasticsearch版本时升级超出时间范围的版本，因为分片不会从较新版本复制到较旧版本。所以升级前先看一下当前Elasticsearch的版本是否支持滚动升级。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Elasticsearch 集群滚动升级">
+<meta property="og:url" content="http://yoursite.com/2017/02/12/Elasticsearch-集群滚动升级/index.html">
 <meta property="og:site_name" content="Focus World">
+<meta property="og:description" content="Elasticsearch集群滚动升级滚动升级允许Elasticsearch集群一次升级一个节点，对用户无停机时间。但是不支持在集群有多个elasticsearch版本时升级超出时间范围的版本，因为分片不会从较新版本复制到较旧版本。所以升级前先看一下当前Elasticsearch的版本是否支持滚动升级。">
+<meta property="og:updated_time" content="2017-02-12T09:09:32.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Focus World">
+<meta name="twitter:title" content="Elasticsearch 集群滚动升级">
+<meta name="twitter:description" content="Elasticsearch集群滚动升级滚动升级允许Elasticsearch集群一次升级一个节点，对用户无停机时间。但是不支持在集群有多个elasticsearch版本时升级超出时间范围的版本，因为分片不会从较新版本复制到较旧版本。所以升级前先看一下当前Elasticsearch的版本是否支持滚动升级。">
 
 
 
@@ -117,13 +121,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/"/>
+  <link rel="canonical" href="http://yoursite.com/2017/02/12/Elasticsearch-集群滚动升级/"/>
 
 
 
 
 
-  <title> Focus World </title>
+  <title> Elasticsearch 集群滚动升级 | Focus World </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -144,9 +148,7 @@
     
   
 
-  <div class="container one-collumn sidebar-position-left 
-   page-home 
- ">
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -257,9 +259,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
 
@@ -292,10 +294,7 @@
             
             
               
-                
-                <a class="post-title-link" href="/2017/02/12/Elasticsearch-集群滚动升级/" itemprop="url">
-                  Elasticsearch 集群滚动升级
-                </a>
+                Elasticsearch 集群滚动升级
               
             
           </h1>
@@ -367,189 +366,110 @@
       
 
       
-        
-          <h1 id="Elasticsearch集群滚动升级"><a href="#Elasticsearch集群滚动升级" class="headerlink" title="Elasticsearch集群滚动升级"></a>Elasticsearch集群滚动升级</h1><p>滚动升级允许Elasticsearch集群一次升级一个节点，对用户无停机时间。但是不支持在集群有多个elasticsearch版本时升级超出时间范围的版本，因为分片不会从较新版本复制到较旧版本。所以升级前先看一下当前Elasticsearch的版本是否支持滚动升级。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/02/12/Elasticsearch-集群滚动升级/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
+        <h1 id="Elasticsearch集群滚动升级"><a href="#Elasticsearch集群滚动升级" class="headerlink" title="Elasticsearch集群滚动升级"></a>Elasticsearch集群滚动升级</h1><p>滚动升级允许Elasticsearch集群一次升级一个节点，对用户无停机时间。但是不支持在集群有多个elasticsearch版本时升级超出时间范围的版本，因为分片不会从较新版本复制到较旧版本。所以升级前先看一下当前Elasticsearch的版本是否支持滚动升级。</p>
+<a id="more"></a>
+<h2 id="关闭分配策略（Disable-shard-allocation）"><a href="#关闭分配策略（Disable-shard-allocation）" class="headerlink" title="关闭分配策略（Disable shard allocation）"></a>关闭分配策略（Disable shard allocation）</h2><p>当停止一个节点时，分配进程在把分片从当前节点复制到其它节点前等待一分钟，这将浪费很多I/O。所以我们可以在关闭一个节点前关闭allocation策略来避免浪费很多I/O的发生</p>
+<pre><code>curl -XPUT http://升级节点IP:9200/_cluster/settings -d &apos;{&quot;transient&quot;:{&quot;cluster.routing.allocation.enable&quot;: &quot;none&quot;}}&apos;
+</code></pre><h2 id="停止没有必要的索引并同步刷新数据（Stop-non-essential-indexing-and-perform-a-synced-flush）"><a href="#停止没有必要的索引并同步刷新数据（Stop-non-essential-indexing-and-perform-a-synced-flush）" class="headerlink" title="停止没有必要的索引并同步刷新数据（Stop non-essential indexing and perform a synced flush）"></a>停止没有必要的索引并同步刷新数据（Stop non-essential indexing and perform a synced flush）</h2><p>您可以在升级过程中继续索引，但是，如果临时停止非必要索引并发出同步刷新请求，则分片将恢复的更快</p>
+<pre><code>curl -XPOST http://升级节点IP:9200/_flush/synced
+</code></pre><p>在同步刷新时，如果有等待的索引操作时同步刷新将失败，我们可以多请求几次</p>
+<h2 id="停止并升级一个单节点（Stop-and-upgrade-a-single-node）"><a href="#停止并升级一个单节点（Stop-and-upgrade-a-single-node）" class="headerlink" title="停止并升级一个单节点（Stop and upgrade a single node）"></a>停止并升级一个单节点（Stop and upgrade a single node）</h2><ul>
+<li>解压缩tarball或者zip目录到一个新目录，注意不要覆盖原来的目录</li>
+<li>拷贝旧安装目录的config文件到新的安装目录</li>
+<li><p>拷贝旧安装目录的data目录到新的安装目录，或者配置config/elasticsearch.yml文件将path.data指向旧安装目录的data目录位置</p>
+<pre><code>ps aux | grep elasticsearch | grep -v grep | awk &apos;{print $2}&apos; | xargs kill -9
+mv /data1/ElasticStack/es /data1/ElasticStack/es.bak
+mv /data1/ElasticStack/elasticsearch-5.2.0 /data1/ElasticStack/es
+cp -r /data1/ElasticStack/es.bak/config/ /data1/ElasticStack/es/
+cp -r /data1/ElasticStack/es.bak/data /data1/ElasticStack/es/
+chown -R es:es /data1/ElasticStack/es/
+</code></pre></li>
+</ul>
+<h2 id="升级插件"><a href="#升级插件" class="headerlink" title="升级插件"></a>升级插件</h2><p>在升级集群节点时，插件也需要一块升级，使用elasticsearch-plugin脚本安装支持当前版本的所需要的插件</p>
+<h2 id="启动升级后的节点"><a href="#启动升级后的节点" class="headerlink" title="启动升级后的节点"></a>启动升级后的节点</h2><ul>
+<li><p>启动升级的节点</p>
+<pre><code>ulimit -l unlimited
+su es
+/data1/ElasticStack/es/bin/elasticsearch -d
+</code></pre></li>
+<li><p>通过日志确认是否正常加入集群，或者通过以下命令查看集群节点状态</p>
+<pre><code>curl -XGET http://10.77.96.180:9200/_cat/nodes?v
+</code></pre></li>
+</ul>
+<h2 id="开启分片分配策略"><a href="#开启分片分配策略" class="headerlink" title="开启分片分配策略"></a>开启分片分配策略</h2><p>一旦升级的节点正常加入集群，就可以重新打开集群的分片分配策略</p>
+<pre><code>curl -XPUT http://升级节点IP:9200/_cluster/settings -d &apos;{&quot;transient&quot;:{&quot;cluster.routing.allocation.enable&quot;: &quot;all&quot;}}&apos;
+</code></pre><h2 id="等待升级节点状态恢复"><a href="#等待升级节点状态恢复" class="headerlink" title="等待升级节点状态恢复"></a>等待升级节点状态恢复</h2><p>在升级下一个节点前，我们需要等待集群完成分片分配，我们可以通过下面的命令请求查看集群健康状态</p>
+<pre><code>curl -XGET http://10.77.96.180:9200/_cat/health?v
+</code></pre><p>当status行变成green表示所有的主分配和副本分片已经完成分配</p>
+<p><strong>重要</strong>：</p>
+<blockquote>
+<ul>
+<li>在滚动升级期间，高版本节点的主分片不会将它们的副本分片分配给低版本的节点，因为新版本与旧版本可能有不一样的数据格式</li>
+<li>如果不能分配一个副本分片到另一个高版本，比如：集群中只有一个节点是高版本，那么副本分片将维持在unassigned状态，并且集群将维持在yellow状态。这时，在程序运行前请检查没有初始化或者正在重新定位的分片。</li>
+<li>尽快升级另一个节点，副本分片将被分配，集群状态将变为green</li>
+</ul>
+</blockquote>
+<p>没有同步刷新的分配将花费一段时间恢复，恢复状态的个别分片可以通过下面的命令监控</p>
+<pre><code>curl -XGET http://10.77.96.180:9200/_cat/recovery?v
+</code></pre><p>如果事先停止索引，恢复索引将很安全很快的完成恢复</p>
+<h2 id="重复"><a href="#重复" class="headerlink" title="重复"></a>重复</h2><p>当集群稳定后并且所有节点都恢复完成后，重复上面的步骤完成其它节点的升级</p>
+
       
     </div>
 
     <div>
       
+        
+
+      
     </div>
 
     <div>
+      
+        
+
       
     </div>
 
 
     <footer class="post-footer">
       
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-  <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/01/31/Elasticsearch-集群部署/">
-
-  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
-    <meta itemprop="name" content="kimi">
-    <meta itemprop="description" content="">
-    <meta itemprop="image" content="/images/avatar.png">
-  </span>
-
-  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-    <meta itemprop="name" content="Focus World">
-    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
-      <img style="display:none;" itemprop="url image" alt="Focus World" src="">
-    </span>
-  </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2017/01/31/Elasticsearch-集群部署/" itemprop="url">
-                  Elasticsearch 集群部署
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-01-31T12:37:23+08:00">
-                2017-01-31
-              </time>
-            
-
-            
-
-            
-          </span>
-
+        <div class="post-tags">
           
-
+            <a href="/tags/Elastic-Stack/" rel="tag"># Elastic Stack</a>
           
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2017/01/31/Elasticsearch-集群部署/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/01/31/Elasticsearch-集群部署/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-             <span id="/2017/01/31/Elasticsearch-集群部署/" class="leancloud_visitors" data-flag-title="Elasticsearch 集群部署">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
         </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
       
-        
-          <p>关于Elasticsearch 5.1集群的安装过程<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/01/31/Elasticsearch-集群部署/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/01/31/Elasticsearch-集群部署/" rel="next" title="Elasticsearch 集群部署">
+                <i class="fa fa-chevron-left"></i> Elasticsearch 集群部署
+              </a>
+            
           </div>
-          <!--/noindex-->
-        
-      
-    </div>
 
-    <div>
-      
-    </div>
+          <span class="post-nav-divider"></span>
 
-    <div>
-      
-    </div>
-
-
-    <footer class="post-footer">
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
       
 
       
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </article>
 
 
-    
-  </section>
 
-  
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
           
           </div>
@@ -557,6 +477,14 @@
 
 
           
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2017/02/12/Elasticsearch-集群滚动升级/"
+           data-title="Elasticsearch 集群滚动升级" data-url="http://yoursite.com/2017/02/12/Elasticsearch-集群滚动升级/">
+      </div>
+    
+  </div>
+
 
         </div>
         
@@ -576,8 +504,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel sidebar-panel-active">
+      <section class="site-overview sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/images/avatar.png"
@@ -626,6 +563,22 @@
 
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Elasticsearch集群滚动升级"><span class="nav-number">1.</span> <span class="nav-text">Elasticsearch集群滚动升级</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#关闭分配策略（Disable-shard-allocation）"><span class="nav-number">1.1.</span> <span class="nav-text">关闭分配策略（Disable shard allocation）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#停止没有必要的索引并同步刷新数据（Stop-non-essential-indexing-and-perform-a-synced-flush）"><span class="nav-number">1.2.</span> <span class="nav-text">停止没有必要的索引并同步刷新数据（Stop non-essential indexing and perform a synced flush）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#停止并升级一个单节点（Stop-and-upgrade-a-single-node）"><span class="nav-number">1.3.</span> <span class="nav-text">停止并升级一个单节点（Stop and upgrade a single node）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#升级插件"><span class="nav-number">1.4.</span> <span class="nav-text">升级插件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启动升级后的节点"><span class="nav-number">1.5.</span> <span class="nav-text">启动升级后的节点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#开启分片分配策略"><span class="nav-number">1.6.</span> <span class="nav-text">开启分片分配策略</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#等待升级节点状态恢复"><span class="nav-number">1.7.</span> <span class="nav-text">等待升级节点状态恢复</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#重复"><span class="nav-number">1.8.</span> <span class="nav-text">重复</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
     </div>
@@ -725,6 +678,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
 
   
 
