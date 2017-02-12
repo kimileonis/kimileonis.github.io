@@ -90,7 +90,7 @@
 <meta property="og:url" content="http://yoursite.com/2017/02/12/Elasticsearch-集群滚动升级/index.html">
 <meta property="og:site_name" content="Focus World">
 <meta property="og:description" content="滚动升级允许Elasticsearch集群一次升级一个节点，对用户无停机时间。但是不支持在集群有多个elasticsearch版本时升级超出时间范围的版本，因为分片不会从较新版本复制到较旧版本。所以升级前先看一下当前Elasticsearch的版本是否支持滚动升级。">
-<meta property="og:updated_time" content="2017-02-12T09:10:38.000Z">
+<meta property="og:updated_time" content="2017-02-12T09:14:19.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Elasticsearch 集群滚动升级">
 <meta name="twitter:description" content="滚动升级允许Elasticsearch集群一次升级一个节点，对用户无停机时间。但是不支持在集群有多个elasticsearch版本时升级超出时间范围的版本，因为分片不会从较新版本复制到较旧版本。所以升级前先看一下当前Elasticsearch的版本是否支持滚动升级。">
@@ -369,8 +369,8 @@
         <p>滚动升级允许Elasticsearch集群一次升级一个节点，对用户无停机时间。但是不支持在集群有多个elasticsearch版本时升级超出时间范围的版本，因为分片不会从较新版本复制到较旧版本。所以升级前先看一下当前Elasticsearch的版本是否支持滚动升级。</p>
 <a id="more"></a>
 <h2 id="关闭分配策略（Disable-shard-allocation）"><a href="#关闭分配策略（Disable-shard-allocation）" class="headerlink" title="关闭分配策略（Disable shard allocation）"></a>关闭分配策略（Disable shard allocation）</h2><p>当停止一个节点时，分配进程在把分片从当前节点复制到其它节点前等待一分钟，这将浪费很多I/O。所以我们可以在关闭一个节点前关闭allocation策略来避免浪费很多I/O的发生</p>
-<pre><code>curl -XPUT http://升级节点IP:9200/_cluster/settings -d &apos;{&quot;transient&quot;:{&quot;cluster.routing.allocation.enable&quot;: &quot;none&quot;}}&apos;
-</code></pre><h2 id="停止没有必要的索引并同步刷新数据（Stop-non-essential-indexing-and-perform-a-synced-flush）"><a href="#停止没有必要的索引并同步刷新数据（Stop-non-essential-indexing-and-perform-a-synced-flush）" class="headerlink" title="停止没有必要的索引并同步刷新数据（Stop non-essential indexing and perform a synced flush）"></a>停止没有必要的索引并同步刷新数据（Stop non-essential indexing and perform a synced flush）</h2><p>您可以在升级过程中继续索引，但是，如果临时停止非必要索引并发出同步刷新请求，则分片将恢复的更快</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">curl -XPUT http://升级节点IP:9200/_cluster/settings <span class="_">-d</span> <span class="string">'&#123;"transient":&#123;"cluster.routing.allocation.enable": "none"&#125;&#125;'</span></div></pre></td></tr></table></figure>
+<h2 id="停止没有必要的索引并同步刷新数据（Stop-non-essential-indexing-and-perform-a-synced-flush）"><a href="#停止没有必要的索引并同步刷新数据（Stop-non-essential-indexing-and-perform-a-synced-flush）" class="headerlink" title="停止没有必要的索引并同步刷新数据（Stop non-essential indexing and perform a synced flush）"></a>停止没有必要的索引并同步刷新数据（Stop non-essential indexing and perform a synced flush）</h2><p>您可以在升级过程中继续索引，但是，如果临时停止非必要索引并发出同步刷新请求，则分片将恢复的更快</p>
 <pre><code>curl -XPOST http://升级节点IP:9200/_flush/synced
 </code></pre><p>在同步刷新时，如果有等待的索引操作时同步刷新将失败，我们可以多请求几次</p>
 <h2 id="停止并升级一个单节点（Stop-and-upgrade-a-single-node）"><a href="#停止并升级一个单节点（Stop-and-upgrade-a-single-node）" class="headerlink" title="停止并升级一个单节点（Stop and upgrade a single node）"></a>停止并升级一个单节点（Stop and upgrade a single node）</h2><ul>
