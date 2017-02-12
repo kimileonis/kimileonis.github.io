@@ -84,16 +84,19 @@
 
 
 
-<meta name="description" content="关于Elasticsearch 5.1集群的安装过程">
+<meta name="description" content="系统环境准备1.优化系统参数
+123456789vim /etc/security/limits.d/90-nproc.conf	*          		soft    nproc           65536vim /etc/security/limits.conf	es               -       nofile          65536	source /etc/prof">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Elasticsearch 集群部署">
 <meta property="og:url" content="http://yoursite.com/2017/01/31/Elasticsearch-集群部署/index.html">
 <meta property="og:site_name" content="Focus World">
-<meta property="og:description" content="关于Elasticsearch 5.1集群的安装过程">
-<meta property="og:updated_time" content="2017-01-31T06:48:12.000Z">
+<meta property="og:description" content="系统环境准备1.优化系统参数
+123456789vim /etc/security/limits.d/90-nproc.conf	*          		soft    nproc           65536vim /etc/security/limits.conf	es               -       nofile          65536	source /etc/prof">
+<meta property="og:updated_time" content="2017-02-12T09:10:55.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Elasticsearch 集群部署">
-<meta name="twitter:description" content="关于Elasticsearch 5.1集群的安装过程">
+<meta name="twitter:description" content="系统环境准备1.优化系统参数
+123456789vim /etc/security/limits.d/90-nproc.conf	*          		soft    nproc           65536vim /etc/security/limits.conf	es               -       nofile          65536	source /etc/prof">
 
 
 
@@ -366,9 +369,8 @@
       
 
       
-        <p>关于Elasticsearch 5.1集群的安装过程<br><a id="more"></a></p>
-<h3 id="系统环境准备"><a href="#系统环境准备" class="headerlink" title="系统环境准备"></a>系统环境准备</h3><p>1.优化系统参数</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">vim /etc/security/limits.d/90-nproc.conf</div><div class="line">	*          		soft    nproc           65536</div><div class="line"></div><div class="line">vim /etc/security/limits.conf</div><div class="line">	es               -       nofile          65536</div><div class="line">	</div><div class="line"><span class="built_in">source</span> /etc/profile</div><div class="line"><span class="built_in">ulimit</span> <span class="_">-l</span> unlimited</div></pre></td></tr></table></figure>
+        <h3 id="系统环境准备"><a href="#系统环境准备" class="headerlink" title="系统环境准备"></a>系统环境准备</h3><p>1.优化系统参数</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">vim /etc/security/limits.d/90-nproc.conf</div><div class="line">	*          		soft    nproc           65536</div><div class="line"></div><div class="line">vim /etc/security/limits.conf</div><div class="line">	es               -       nofile          65536</div><div class="line">	</div><div class="line"><span class="built_in">source</span> /etc/profile</div><div class="line"><span class="built_in">ulimit</span> <span class="_">-l</span> unlimited</div><div class="line">&lt;!--more--&gt;</div></pre></td></tr></table></figure>
 <p>2.关闭或者减少swap使用</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">sysctl vm.swappiness=1</div><div class="line"><span class="built_in">echo</span> <span class="string">"vm.swappiness = 1"</span> &gt;&gt; /etc/sysctl.conf</div></pre></td></tr></table></figure>
 <p>3.调整一个进程可以拥有的VMA(虚拟内存区域)的数量</p>
